@@ -68,10 +68,13 @@ impl JsonRpcTransport {
         let base_url = config.base_url.trim_end_matches('/').to_owned();
         let card_url = crate::agent_card_url(&base_url);
 
-        let client = reqwest::Client::builder()
+        let builder = reqwest::Client::builder()
             .timeout(Duration::from_secs(config.timeout_secs))
-            .default_headers(config.headers)
-            .danger_accept_invalid_certs(!config.verify_tls)
+            .default_headers(config.headers);
+        // Certificate checks only exist when a TLS backend is enabled.
+        #[cfg(any(feature = "rustls", feature = "rustls-no-provider"))]
+        let builder = builder.danger_accept_invalid_certs(!config.verify_tls);
+        let client = builder
             .build()
             .map_err(|e| A2AError::Other(e.to_string()))?;
 
