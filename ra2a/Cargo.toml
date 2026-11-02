@@ -42,7 +42,12 @@ tracing-subscriber.workspace = true
 tonic-prost-build = { workspace = true, optional = true }
 
 [features]
-default = ["client", "server"]
+default = ["client", "server", "rustls"]
+# HTTP TLS: `rustls` is reqwest's default (rustls with the aws-lc-rs provider).
+rustls = ["reqwest/rustls"]
+# rustls without a built-in crypto provider: install one (ring, graviola, ...)
+# with `rustls::crypto::CryptoProvider::install_default` before building a client.
+rustls-no-provider = ["reqwest/rustls-no-provider"]
 client = []
 server = ["axum"]
 grpc = ["client", "tonic", "prost", "prost-types", "tonic-prost", "tonic-prost-build", "google-api-proto", "tokio-stream"]
